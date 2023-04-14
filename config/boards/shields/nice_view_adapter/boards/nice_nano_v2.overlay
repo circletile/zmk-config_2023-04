@@ -1,6 +1,23 @@
 #include <dt-bindings/led/led.h>
 
 &pinctrl {
+    spi0_default: spi0_default {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 20)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 17)>,
+				<NRF_PSEL(SPIM_MISO, 0, 25)>;
+		};
+	};
+
+	spi0_sleep: spi0_sleep {
+		group1 {
+			psels = <NRF_PSEL(SPIM_SCK, 0, 20)>,
+				<NRF_PSEL(SPIM_MOSI, 0, 17)>,
+				<NRF_PSEL(SPIM_MISO, 0, 25)>;
+			low-power-enable;
+		};
+	};
+
     spi1_default: spi1_default {
         group1 {
             //    mosi-pin = <6>;
@@ -27,13 +44,20 @@
     };
 };
 
-&spi1 {
-    compatible = "nordic,nrf-spim";
-    status = "okay";
+nice_view_spi: &spi0 {
+	compatible = "nordic,nrf-spim";
+	pinctrl-0 = <&spi0_default>;
+	pinctrl-1 = <&spi0_sleep>;
+	pinctrl-names = "default", "sleep";
+	cs-gpios = <&pro_micro 1 GPIO_ACTIVE_HIGH>;
+};
 
+sofle_rgb_spi: &spi1 {
+    compatible = "nordic,nrf-spim";
     pinctrl-0 = <&spi1_default>;
     pinctrl-1 = <&spi1_sleep>;
     pinctrl-names = "default", "sleep";
+    status = "okay";
 
     led_strip: ws2812@0 {
         compatible = "worldsemi,ws2812-spi";
@@ -53,6 +77,10 @@
             LED_COLOR_ID_BLUE
         >;
     };
+};
+
+&pro_micro_i2c {
+    status = "disabled";
 };
 
 / {
